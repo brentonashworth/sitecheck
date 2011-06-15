@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 
 -- | Datatypes and class definitions for SiteCheck. Definitions and associated
--- functions for Links, Scripts, Config, State and Responses.
+-- functions for 'Link', 'Script', 'Config', 'State' and 'Response'.
 
 module Network.SiteCheck.Data where
 
@@ -27,18 +27,18 @@ instance URLish String where
              Nothing -> emptyURL
   toLink s = toLink $ toURL s
 
--- | The HTTP status code for a Link.
+-- | The HTTP status code for a 'Link'.
 data StatusCode =   NoCode 
                   | Code Int 
                   deriving (Show, Eq)
 
--- | A Link holds the URL being tracked, the parent URL where this URL was
--- found, the final status code and a list of the previous URLs which 
+-- | A Link holds the URL being tracked, the parent URL where this URL 
+-- was found, the final StatusCode and a list of the previous URLs which 
 -- redirected to this page.
 --
 -- When a URL returns a 301 or 302 status code and a location header, a new
--- Link is created with the location as the URL and the old URL added to the
--- previous list.
+-- Link is created with the location as the URL and the old URL added to 
+-- the previous list.
 data Link = Link {
     parent :: URL        -- ^ the URL where this Link was found
   , previous :: [URL]    -- ^ a list of URLs which redirected to this one
@@ -46,7 +46,7 @@ data Link = Link {
   , theURL   :: URL      -- ^ the URL being tracked
   } deriving (Show, Eq)
 
--- | A Link is URLish.
+-- | A Link is 'URLish'.
 instance URLish Link where
   toURL l = (theURL l)
   toLink l = l
@@ -55,29 +55,29 @@ instance URLish Link where
 urlToLink :: URL -> Link
 urlToLink url = (Link emptyURL [] NoCode url)
 
--- | Create a new Link from something URLish adding the URL from the old 
+-- | Create a new Link from something URLish adding the 'URL' from the old 
 -- Link to the list of previous URLs.
 newLinkWithPrev :: URLish a => Link -> a -> Link
 newLinkWithPrev old new = 
   (old { previous = (toURL old) : (previous old), theURL = (toURL new)})
 
--- | Is the current status code 301 or 302?
+-- | Is the 'StatusCode' in a Link 301 or 302?
 isRedirect :: Link -> Bool
 isRedirect (Link _ _ (Code 301) _) = True
 isRedirect (Link _ _ (Code 302) _) = True
 isRedirect (Link _ _ _ _) = False
 
--- | Was the current Link the result of a redirect?
+-- | Was this Link the result of a redirect?
 wasRedirected :: Link -> Bool
 wasRedirected (Link _ (x:xs) _ _) = True
 wasRedirected (Link _ _ _ _) = False
 
--- | Is the status code for this Link 200?
+-- | Is the 'StatusCode' for this Link 200?
 statusOk :: Link -> Bool
 statusOk (Link _ _ (Code 200) _) = True
 statusOk (Link _ _ _ _) = False
 
--- | Returns a list of distinct Links. Two links are considered the same if
+-- | Returns a list of distinct Links. Two Links are considered the same if
 -- they have the same textual representation.
 distinctLinks :: [Link] -> [Link]
 distinctLinks = 
@@ -92,8 +92,8 @@ distinctLinks =
 data Option =   Limit Int          -- ^ the maximum number of URLs to crawl
               | ResultFile String  -- ^ a file name where results are printed
               | PrintStatus        -- ^ print each URL as it is retrieved
-              | PrintStack         -- ^ print the complete stack
-              | PrintTopStack      -- ^ print the top five stack entries
+              | PrintStack         -- ^ print the complete 'Stack'
+              | PrintTopStack      -- ^ print the top five Stack entries
               | PrintActions       -- ^ print the actions chosen for each URL
               | PrintPosts         -- ^ print each post action
               | PrintParent        -- ^ print the parent of each URL
@@ -101,12 +101,7 @@ data Option =   Limit Int          -- ^ the maximum number of URLs to crawl
               | RedirectResults    -- ^ show errors and redirects
               deriving (Show, Eq)
 
--- | Predicate for selecting the Limit Option from a list of Options.
-isLimit :: Option -> Bool
-isLimit (Limit _) = True
-isLimit _         = False
-
--- | Get the Limit value from a list of Options.
+-- | Get the 'Limit' value from a list of Options.
 getLimit :: [Option] -> Maybe Int
 getLimit (x:xs) = 
   case x of
@@ -114,7 +109,7 @@ getLimit (x:xs) =
     _         -> getLimit xs
 getLimit []   = Nothing
 
--- | Get the ResultFile value from a list of Options.
+-- | Get the 'ResultFile' value from a list of Options.
 getResultFile :: [Option] -> Maybe String
 getResultFile (x:xs) =
   case x of
@@ -124,6 +119,14 @@ getResultFile [] = Nothing
 
 type Mapping a = (a -> Maybe a)
 
+-- | Mappings control how a string, which comes from an anchor href attribute
+-- becomes a 'URL' which will be reported. Each mapping function returns a
+-- Maybe value. Because a mapping may return Nothing, it can be used for
+-- filtering as well as transforming URLs. 
+-- 
+-- During the link filtering process raw strings are first passed through 
+-- the stringToString mappings then the urlToUrl mappings and finally the
+-- urlToListOfURL mappings.
 data Mappings = Mappings {
     stringToString :: [Mapping String]
   , urlToURL :: [Mapping URL]
