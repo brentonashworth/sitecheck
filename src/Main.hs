@@ -12,7 +12,7 @@ import Network.SiteCheck.URL
 
 domain = "www.google.com"
 httpG = "http://" ++ domain
-userAgent = "SiteCheck 0.0.2"
+userAgent = "SiteCheck 0.0.4"
 
 -- | If we encounter the main google page then submit a search, otherwise
 -- add links to the stack and continue.
