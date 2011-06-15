@@ -16,8 +16,7 @@ h2. Building
 
 To work with this project, use some combination of the following make commands:
 
-<pre><code>
-make clean
+<pre><code>make clean
 make sitecheck
 make tests
 make cov
@@ -27,8 +26,7 @@ h2. Install
 
 To use this library, you will need to have <a href="http://hackage.haskell.org/platform/">Haskell</a> installed. Next, clone this repository, navigate into the top level directory and run the following commands:
 
-<pre><code>
-cabal configure
+<pre><code>cabal configure
 cabal build
 cabal install
 </code></pre>
