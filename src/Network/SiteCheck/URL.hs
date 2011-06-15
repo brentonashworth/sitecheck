@@ -13,6 +13,7 @@ module Network.SiteCheck.URL
   , fixedCombinations
   , emptyURL
   , isInDomain
+  , (</>)
   ) where
 
 import Network.URL
@@ -44,16 +45,23 @@ orderParams = modifyParams sort
 removeParams :: URL -> URL
 removeParams (URL t p _) = URL t p []
 
+-- | Merge two paths into one.
+(</>) :: String -> String -> String
+"" </>  b = b
+a  </> "" = a
+a  </>  b = a ++ "/" ++ b
+
 -- | Use the information in the first URL parameter to make the second URL
 -- absolute. This will only return a new URL is the type of the second
 -- URL is HostRelative or PathRelative.
 makeAbsolute :: URL -> URL -> URL
 makeAbsolute (URL t path params) url = 
   case url_type url of
-    PathRelative -> URL t (url_path url) (url_params url)
+    PathRelative -> URL t (prefixPath path url) (url_params url)
     HostRelative -> URL t (url_path url) (url_params url)
     Absolute _   -> url
-
+  where prefixPath path url = path </> (url_path url)
+   
 -- | Sometimes a URL may encode a list of options such as:
 -- 
 -- >   colors=red&colors=blue&colors=green 

@@ -58,17 +58,17 @@ prop_param_is_removed url
 prop_params_are_ordered url = 
   (url_params (orderParams url)) == sort (url_params url)
 
-prop_host_is_added url =
-  let Just root = importURL "http://www.company.com/some/page?name=dan&age=20"
-      url' = (makeAbsolute root url)
-  in case (url_type url) of
-       PathRelative -> (url_type url')   == (url_type root) && 
-                       (url_path url')   == (url_path url) &&
-                       (url_params url') == (url_params url)
-       HostRelative -> (url_type url')   == (url_type root) &&
-                       (url_path url')   == (url_path url) &&
-                       (url_params url') == (url_params url)
-       Absolute _   -> url' == url
+prop_host_is_added old =
+  let Just base = importURL "http://www.company.com/some/page?name=dan&age=20"
+      new = (makeAbsolute base old)
+  in case (url_type old) of
+       PathRelative -> (url_type new)   == (url_type base) && 
+                       (url_path new)   == (url_path base) </> (url_path old) &&
+                       (url_params new) == (url_params old)
+       HostRelative -> (url_type new)   == (url_type base) &&
+                       (url_path new)   == (url_path old) &&
+                       (url_params new) == (url_params old)
+       Absolute _   -> new == old
 
 fixedCombinations1 = 
   let Just url = importURL "http://c.c/page?a=1&a=2" in

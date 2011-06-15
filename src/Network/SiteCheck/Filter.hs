@@ -6,6 +6,7 @@ module Network.SiteCheck.Filter
   , notIn
   , transformJs
   , firstJs
+  , removeJs
   , orderedParams
   , removeParameters
   , limitCombinations
@@ -63,7 +64,7 @@ runToListMaps (f:fs) xs = runToListMaps fs $ concat $ map m xs
 runToListMaps [] xs = xs
 
 -- Some internal mapping functions
--- ==============================
+-- ===============================
 
 -- | Create a mapping function which will filter Strings with a specific 
 -- prefix.
@@ -140,5 +141,9 @@ firstJs = \y ->
   drop 2 $
   take ((length y) - 2) y
 
-
-
+-- | A Mapping which will remove any javascript functions.
+removeJs :: Mapping String
+removeJs x =
+  if x =~ ("^javascript:.*")
+  then Nothing
+  else Just x

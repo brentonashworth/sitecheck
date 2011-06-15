@@ -20,15 +20,22 @@ testInput = [ "#a"
             , "top"
             , "/view?name=tim"
             , "javascript:view('c')"
+            , "javascript:someFunction('x')"
+            , "?name=joe"
+            , "list?name=joe"
+            , "/list?name=joe"
             , "http://a.b.c/limit?f=1&f=2&f=3"
             , "http://e.f.g/m?p=m#top"
             , "http://e.f.g/n?c=m&a=n&b=z"
             , "bottom"
             ]
 
-expected = [ "http://a.b.c/test"
+expected = [ "http://a.b.c/j/test"
            , "http://a.b.c/view?name=tim"
-           , "http://a.b.c/c"
+           , "http://a.b.c/j/c"
+           , "http://a.b.c/j?name=joe"
+           , "http://a.b.c/j/list?name=joe"
+           , "http://a.b.c/list?name=joe"
            , "http://a.b.c/limit?f=1"
            , "http://a.b.c/limit?f=2"
            , "http://a.b.c/limit?f=3"
@@ -37,7 +44,8 @@ expected = [ "http://a.b.c/test"
            ]
 
 testMappings = (Mappings [ (notIn ["top", "bottom"])
-                         , (transformJs "view" firstJs)]
+                         , (transformJs "view" firstJs)
+                         , removeJs]
                      
                          [ orderedParams
                          , removeParameters ["p"]]
