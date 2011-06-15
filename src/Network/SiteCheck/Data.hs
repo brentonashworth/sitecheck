@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 
 -- | Datatypes and class definitions for SiteCheck. Definitions and associated
--- functions for Links, Scripts, Configuration, State and Responses.
+-- functions for Links, Scripts, Config, State and Responses.
 
 module Network.SiteCheck.Data where
 
@@ -27,28 +27,26 @@ instance URLish String where
              Nothing -> emptyURL
   toLink s = toLink $ toURL s
 
--- Links hold all of the information that we track about links that are while
--- crawling a domain.
-
--- | The HTTP status code for a link.
+-- | The HTTP status code for a Link.
 data StatusCode =   NoCode 
                   | Code Int 
                   deriving (Show, Eq)
 
--- | A Link holds the URL being tracked, the parent page where this URL was
--- found, the status final status code and a list of prevous pages which 
+-- | A Link holds the URL being tracked, the parent URL where this URL was
+-- found, the final status code and a list of the previous URLs which 
 -- redirected to this page.
 --
 -- When a URL returns a 301 or 302 status code and a location header, a new
--- Link is created with the location as the url and the old url added to the
+-- Link is created with the location as the URL and the old URL added to the
 -- previous list.
 data Link = Link {
-    parent :: URL        -- ^ the url where this link was found
-  , previous :: [URL]    -- ^ a list of urls which redirected to this one
-  , status :: StatusCode -- ^ the final status code for this url
-  , theURL   :: URL      -- ^ the URL we are tracking
+    parent :: URL        -- ^ the URL where this Link was found
+  , previous :: [URL]    -- ^ a list of URLs which redirected to this one
+  , status :: StatusCode -- ^ the final status code for this URL
+  , theURL   :: URL      -- ^ the URL being tracked
   } deriving (Show, Eq)
 
+-- | A Link is URLish.
 instance URLish Link where
   toURL l = (theURL l)
   toLink l = l
@@ -57,24 +55,24 @@ instance URLish Link where
 urlToLink :: URL -> Link
 urlToLink url = (Link emptyURL [] NoCode url)
 
--- | Create a new Link from something URLish adding the old link to the
--- list of previous pages
+-- | Create a new Link from something URLish adding the URL from the old 
+-- Link to the list of previous URLs.
 newLinkWithPrev :: URLish a => Link -> a -> Link
-newLinkWithPrev l loc = 
-  (l { previous = (toURL l) : (previous l), theURL = (toURL loc)})
+newLinkWithPrev old new = 
+  (old { previous = (toURL old) : (previous old), theURL = (toURL new)})
 
--- | Is the current status code 301 or 302
+-- | Is the current status code 301 or 302?
 isRedirect :: Link -> Bool
 isRedirect (Link _ _ (Code 301) _) = True
 isRedirect (Link _ _ (Code 302) _) = True
 isRedirect (Link _ _ _ _) = False
 
--- | Was the current Link the result of a redirect.
+-- | Was the current Link the result of a redirect?
 wasRedirected :: Link -> Bool
 wasRedirected (Link _ (x:xs) _ _) = True
 wasRedirected (Link _ _ _ _) = False
 
--- | Is the status code for this Link 200.
+-- | Is the status code for this Link 200?
 statusOk :: Link -> Bool
 statusOk (Link _ _ (Code 200) _) = True
 statusOk (Link _ _ _ _) = False
@@ -86,14 +84,12 @@ distinctLinks =
   nubBy (\a b -> (u a) == (u b))
   where u = (exportURL . toURL)
 
--- A Script defines the crawling behavior for SiteCheck.
-
 -- | As SiteCheck runs it can be configured to print status information using
 -- the following options. When a crawl is complete any non-200 status codes
 -- will be reported. If you set AllResults then all results will be shown, if
--- you set RedirectResults then all recirects are shown in addition to
+-- you set RedirectResults then all redirects are shown in addition to
 -- failures.
-data Option =   Limit Int          -- ^ the maximum number of pages to crawl
+data Option =   Limit Int          -- ^ the maximum number of URLs to crawl
               | ResultFile String  -- ^ a file name where results are printed
               | PrintStatus        -- ^ print each URL as it is retrieved
               | PrintStack         -- ^ print the complete stack
@@ -105,12 +101,12 @@ data Option =   Limit Int          -- ^ the maximum number of pages to crawl
               | RedirectResults    -- ^ show errors and redirects
               deriving (Show, Eq)
 
--- | Predicate for selecting the Limit Option from a list of options.
+-- | Predicate for selecting the Limit Option from a list of Options.
 isLimit :: Option -> Bool
 isLimit (Limit _) = True
 isLimit _         = False
 
--- | Get the Limit value from a list of options.
+-- | Get the Limit value from a list of Options.
 getLimit :: [Option] -> Maybe Int
 getLimit (x:xs) = 
   case x of
@@ -118,7 +114,7 @@ getLimit (x:xs) =
     _         -> getLimit xs
 getLimit []   = Nothing
 
--- | Get the result file value from a list of options.
+-- | Get the ResultFile value from a list of Options.
 getResultFile :: [Option] -> Maybe String
 getResultFile (x:xs) =
   case x of
