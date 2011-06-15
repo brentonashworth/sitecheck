@@ -1,0 +1,52 @@
+h1. SiteCheck
+
+SiteCheck is a Haskell library for web developers and web site administrators for automating the process of checking a web site for broken links and for any pages which are not returning a 200 status code.
+
+SiteCheck will crawl a domain and record the status of every URL which is retrieved. It will retrieve URLs outside of the domain but will not process the results or crawl outside of the domain.
+
+As a developer, you use SiteCheck by writing a "script" which controls how it behaves. In this script you may specify "decisions" which are made when a specific URL is retrieved. You may choose to ignore a page, post a form or push the links from that page on to the crawl stack. SiteCheck is built on top of Network.Curl so it can handle secure http requests.
+
+SiteCheck will follow redirects and report a page based on the final status code that is received. If will also keep track of all redirects so that you can fix links on your end.
+
+Finally, SiteCheck allows you to filter and transform URLs before they are added to the stack. This allows you to eliminate parameters that are unnecessary, order parameters so that the same page is not visited twice (with parameters in a different order) and limit the number of combinations of parameters for a page which takes multiple parameters with the same name.
+
+This is a new project, so there is no documentation other than the source code. To get started, look at the example script in Main.hs.
+
+h2. Building
+
+To work with this project, use some combination of the following make commands:
+
+<pre>
+<code>
+make clean
+make sitecheck
+make tests
+make cov
+</code>
+</pre>
+
+h2. Install
+
+To use this library, you will need to have <a href="http://hackage.haskell.org/platform/">Haskell</a> installed. The library is not currently in hackage but it may be in the future. You will need to install from source. To do this, clone this repository, navigate into the top level directory and run the following commands:
+
+<pre>
+<code>
+cabal configure
+cabal build
+cabal install
+</code>
+</pre>
+
+h2. TODO
+
+Other than bringing this library into a stable condition, I do have some ideas for improvements and added usefulness.
+
+# Create an external DSL so that users will not *get* to write scripts in Haskell.
+# Read the output file and recheck URLs to see if problems have been resolved.
+# Find CSS that is not being used.
+
+h2. License
+
+Copyright (C) 2011 Brenton Ashworth
+
+Distributed under the BSD3 license. See the file LICENSE.

@@ -1,0 +1,61 @@
+Name:          sitecheck
+Version:       0.0.3
+Cabal-Version: >= 1.10
+Author:        Brenton Ashworth brenton at formpluslogic dot com
+Maintainer:    Brenton Ashworth brenton at formpluslogic dot com
+Synopsis:      Automate checking a site for non 200 status codes
+Description:   SiteCheck is a Haskell library for web developers and web site 
+               administrators for automating the process of checking a web 
+               site for broken links and for any pages which are not returning 
+               a 200 status code.
+
+               SiteCheck will crawl a domain and record the status of every 
+               URL which is retrieved. It will retrieve URLs outside of the 
+               domain but will not process the results or crawl outside of the 
+               domain.
+
+               As a developer, one uses SiteCheck by writing a script which 
+               controls how it behaves. This script specifies decisions which 
+               are made when a specific URL is retrieved. You may choose to 
+               ignore a page, post a form or add the links on that page to the 
+               crawl stack. SiteCheck is built on top of Network.Curl so it 
+               can handle secure http requests.
+
+               SiteCheck will follow redirects and report a page based on the 
+               final status code that is received. If will also keep track of 
+               all redirects so that you can fix links on your end.
+
+               Finally, SiteCheck allows you to filter and transform URLs 
+               before they are added to the stack. This allows you to 
+               eliminate parameters that are unnecessary, order parameters so 
+               that the same page is not visited twice (with parameters in a 
+               different order) and limit the number of combinations of 
+               parameters for page which take multiple parameters with the 
+               same name.
+Category:      Network
+Homepage:      GitHib
+Bug-Reports:   GitHub
+Copyright:     (c) 2011 Brenton Ashworth
+License:       BSD3
+License-File:  LICENSE
+Stability:     alpha
+Build-Type:    Simple
+Tested-With:   GHC ==7.0.3
+
+Library
+  Default-Language: Haskell98
+  Build-Depends:   base >= 4.0, 
+                   tagsoup ==0.12.*, 
+                   curl ==1.3.*, 
+                   url ==2.1.*,
+                   regex-posix,
+                   regex-compat,
+                   containers
+  Exposed-Modules: Network.SiteCheck,
+                   Network.SiteCheck.Filter,
+                   Network.SiteCheck.URL,
+                   Network.SiteCheck.Data,
+                   Network.SiteCheck.Util,
+                   Network.SiteCheck.Output
+
+  Hs-Source-Dirs:  src
