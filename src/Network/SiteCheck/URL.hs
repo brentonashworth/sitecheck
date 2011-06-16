@@ -13,11 +13,13 @@ module Network.SiteCheck.URL
   , fixedCombinations
   , emptyURL
   , isInDomain
-  , (</>)
+  , (>/<)
   ) where
 
 import Network.URL
-import Data.List (partition, sort)
+import Data.List (partition, sort, intersperse)
+
+import Network.SiteCheck.Util
 
 type Param = (String, String)
 
@@ -45,11 +47,19 @@ orderParams = modifyParams sort
 removeParams :: URL -> URL
 removeParams (URL t p _) = URL t p []
 
--- | Merge two paths into one.
+-- | Create a new path from two paths.
 (</>) :: String -> String -> String
 "" </>  b = b
 a  </> "" = a
 a  </>  b = a ++ "/" ++ b
+
+-- | Merge two paths where the second path is path-relative to the first.
+(>/<) :: String -> String -> String
+a  >/<  b = (relative a) </> b
+            where relative x = concat $ 
+                               intersperse "/" $
+                               (\xs -> take (length xs - 1) xs) $ 
+                               splitWith "/" x
 
 -- | Use the information in the first URL parameter to make the second URL
 -- absolute. This will only return a new URL is the type of the second
@@ -60,7 +70,7 @@ makeAbsolute (URL t path params) url =
     PathRelative -> URL t (prefixPath path url) (url_params url)
     HostRelative -> URL t (url_path url) (url_params url)
     Absolute _   -> url
-  where prefixPath path url = path </> (url_path url)
+  where prefixPath path url = path >/< (url_path url)
    
 -- | Sometimes a URL may encode a list of options such as:
 -- 

@@ -26,3 +26,4 @@ clean:
 	rm -f `find . -type f -name *.o`
 	rm -f *.html
 	rm -f TestSuite.tix
+	rm -rf dist

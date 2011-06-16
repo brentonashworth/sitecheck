@@ -58,7 +58,7 @@ noWebhp url = if (url_path url) == "webhp"
 sampleScript = Script { 
     dn = domain
   , options = [Limit 20
---              , AllResults       -- Show all results, even 200
+              , AllResults         -- Show all results, even 200
 --              , RedirectResults  -- Show non 200 and any redirect pages
               , PrintStatus        -- Print each URL as it is being checked
 --              , PrintStack       -- Print everything in the stack
@@ -66,7 +66,7 @@ sampleScript = Script {
 --              , PrintActions     -- Print the actions for each page
 --              , PrintParent      -- Print the parent for each page
 --              , PrintPosts       -- Print Post information
-              , ResultFile "results.txt" -- Write results to a file
+              , ResultFile "results.csv" -- Write results to a file
               ]
   , intOpts = [ CurlCookieJar "intraCookies"
 --              , CurlVerbose True

@@ -14,6 +14,7 @@ module Network.SiteCheck.Filter
   , removeMailTo
   , removeLeadingHash
   , removeHash
+  , ignoreMatch
   ) where
 
 import Control.Monad (liftM)
@@ -38,11 +39,10 @@ filterLinks mappings thisPage xs =
     -- converted to [Maybe URL]
     map (\x -> importURL =<< x) $
     runMaps (stringToString mappings) $
-    runMaps [
-                  removeLeadingHash
-                , removeHash
-                , removeMailTo
-                ] $
+    runMaps [ removeLeadingHash
+            , removeHash
+            , removeMailTo
+            , (addPathToQueries thisPage)] $
     -- start with [Maybe String]
     map Just xs
 
@@ -85,7 +85,16 @@ removeLeadingHash = startsWith "#"
 -- | Mapping for removing a hash from withing a string.
 removeHash :: Mapping String
 removeHash = safeHead . splitRegex (mkRegex "#")
-  
+
+-- | Create a mapping which will add the path from the parent page to any
+-- URL string which begins with ?.
+addPathToQueries :: URL -> Mapping String
+addPathToQueries parent x = 
+  let path = (url_path parent) in
+  if "?" `isPrefixOf` x
+  then Just ("/" ++ path ++ x)
+  else Just x
+
 -- Some mappings you may want to use
 -- ================================
 
@@ -147,3 +156,12 @@ removeJs x =
   if x =~ ("^javascript:.*")
   then Nothing
   else Just x
+
+-- | Create a Mapping which will remove any strings which match the regular
+-- expressions in the given list.
+ignoreMatch :: [String] -> Mapping String
+ignoreMatch (x:xs) s = if s =~ x
+                       then Nothing
+                       else ignoreMatch xs s
+ignoreMatch [] s = Just s
+

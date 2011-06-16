@@ -18,13 +18,26 @@ printRedirects x = do
     mapM_ (\next -> do 
             putStrLn (indent ++ (exportURL next))) redirects
 
+codeString :: StatusCode -> String
+codeString (Code x) = show x
+codeString NoCode = "None"
+
 outputFile :: FilePath -> [Link] -> IO ()
 outputFile path links = do
   handle <- openFile path WriteMode
+  hPutStrLn handle "\"Parent URL\",\"URL\",\"Status\""
   mapM_ (\x -> do 
-          hPutStrLn handle (exportURL $ theURL x)) 
+          let p = exportURL $ parent x
+              url = exportURL $ theURL x
+          hPutStr handle $ wrap p
+          hPutStr handle ","
+          hPutStr handle $ wrap url
+          hPutStr handle ","
+          hPutStr handle $ wrap $ codeString (status x)
+          hPutStrLn handle "")
         links
   hClose handle
+  where wrap x = "\"" ++ x ++ "\""
 
 output :: Config -> [Link] -> IO ()
 output config@(_, script) links = do
@@ -33,10 +46,11 @@ output config@(_, script) links = do
   putStrLn ("Checked " ++ show (length links) ++ 
             " pages in the domain " ++ (dn script) ++ ".")
   mapM_ (\x -> do 
-               putStr (show (status x))
-               putStrLn (", " ++ (exportURL $ theURL x))
-               putStrLn ("Parent:")
-               putStrLn (indent ++ (exportURL $ parent x))
+               putStrLn ""
+               putStr $ codeString (status x)
+               putStrLn (" - " ++ (exportURL $ theURL x))
+               putStr ("Parent: ")
+               putStrLn ((exportURL $ parent x))
                printRedirects x) results
   case getResultFile (options script) of
     Just name -> outputFile name results

@@ -23,6 +23,13 @@ tests = [ testCase "remove params with params" removeParamsWithParams
         , testCase "fixed combinations 2" fixedCombinations2
         , testCase "is in domain" itIsInDomain
         , testCase "is not in domain" itIsNotInDomain
+        , testCase "merge paths 1" mergePaths1
+        , testCase "merge paths 2" mergePaths2
+        , testCase "merge paths 3" mergePaths3
+        , testCase "merge paths 4" mergePaths4
+        , testCase "merge paths 5" mergePaths5
+        , testCase "merge paths 6" mergePaths6
+        , testCase "merge paths 7" mergePaths7
         ]
 
 roundtrip :: (URL -> URL) -> String -> String
@@ -63,7 +70,7 @@ prop_host_is_added old =
       new = (makeAbsolute base old)
   in case (url_type old) of
        PathRelative -> (url_type new)   == (url_type base) && 
-                       (url_path new)   == (url_path base) </> (url_path old) &&
+                       (url_path new)   == (url_path base) >/< (url_path old) &&
                        (url_params new) == (url_params old)
        HostRelative -> (url_type new)   == (url_type base) &&
                        (url_path new)   == (url_path old) &&
@@ -93,3 +100,12 @@ itIsInDomain =
 itIsNotInDomain =
   let Just url = importURL "http://a.b.c/test" in
   False @=? isInDomain "a.b.d" url
+
+mergePaths1 = ""          @=? ""      >/< ""
+mergePaths2 = ""          @=? "a"     >/< ""
+mergePaths3 = "b"         @=? ""      >/< "b"
+mergePaths4 = "b"         @=? "a"     >/< "b"
+mergePaths5 = "a/c"       @=? "a/b"   >/< "c"
+mergePaths6 = "a/c/d"     @=? "a/b"   >/< "c/d"
+mergePaths7 = "a/b/d/e/f" @=? "a/b/c" >/< "d/e/f"
+  

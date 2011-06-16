@@ -4,6 +4,8 @@
 
 module Network.SiteCheck.Util where
 
+import Text.Regex (mkRegex, splitRegex)
+
 -- | Given a list of Maybe values, remove the Nothing values and return a list
 -- of unpacked values.
 fromMaybe :: [Maybe a] -> [a]
@@ -17,3 +19,6 @@ fromMaybe xs = foldr g [] xs
 safeHead :: [a] -> Maybe a
 safeHead (x:xs) = Just x
 safeHead [] = Nothing
+
+splitWith :: String -> String -> [String] 
+splitWith s = splitRegex (mkRegex s)
