@@ -1,38 +1,40 @@
 Name:          sitecheck
 Version:       0.0.5
 Cabal-Version: >= 1.10
-Author:        Brenton Ashworth brenton at formpluslogic dot com
-Maintainer:    Brenton Ashworth brenton at formpluslogic dot com
-Synopsis:      Automate checking a site for non 200 status codes
+Author:        Brenton Ashworth
+Maintainer:    brenton at formpluslogic dot com
+Synopsis:      Single domain web site testing crawler library.
 Description:   SiteCheck is a Haskell library for web developers and web site 
-               administrators for automating the process of checking a web 
-               site for broken links and for any pages which are not returning 
-               a 200 status code.
-
+               administrators which allows for the creation of crawlers which
+               can find and report problems in a single domain.
+               .
+               Because it is a crawler, its deafault behavior is to report any
+               pages which return non 200 status codes. New behaviors may be
+               added to the crawler to allow it to report any information that
+               can be obtained from analyzing the contents of a web page.
+               .
                SiteCheck will crawl a domain and record the status of every 
-               URL which is retrieved. It will retrieve URLs outside of the 
-               domain but will not process the results or crawl outside of the 
-               domain.
-
-               As a developer, one uses SiteCheck by writing a script which 
-               controls how it behaves. This script specifies decisions which 
-               are made when a specific URL is retrieved. You may choose to 
-               ignore a page, post a form or add the links on that page to the 
-               crawl stack. SiteCheck is built on top of Network.Curl so it 
-               can handle secure http requests.
-
-               SiteCheck will follow redirects and report a page based on the 
-               final status code that is received. If will also keep track of 
-               all redirects so that you can fix links on your end.
-
-               Finally, SiteCheck allows you to filter and transform URLs 
-               before they are added to the stack. This allows you to 
-               eliminate parameters that are unnecessary, order parameters so 
-               that the same page is not visited twice (with parameters in a 
-               different order) and limit the number of combinations of 
-               parameters for page which take multiple parameters with the 
-               same name.
-Category:      Network
+               page which is retrieved. Any URL which points outside of the
+               domain being searched will be sent a HEAD request so that it can 
+               be reported but not crawled.
+               .
+               Every web site is different and so the crawling process can be
+               scripted. A Script allows the developer to set output options,
+               curl options, add seed URLs, specify decisions which are to be 
+               made when a specific URL is encountered and provide mappings 
+               which allow scraped links to be filtered and transformed.
+               .
+               Decisions include submitting a form, adding the links on a page
+               to the crawl stack or ignoring a page. SiteCheck is built on top
+               of Network.Curl. This combined with Decisions allow it to log in
+               and crawl secure areas of a site.
+               .
+               SiteCheck will automatically follow redirects until either a non
+               redirecting status code is returned or a cycle is detected.
+               Redirect status codes are not reported unless a cycle is detected.
+               Otherwise the final status code is reported. Output can be 
+               configured to show redirects.
+Category:      Web
 Homepage:      http://github.com/brentonashworth/sitecheck
 Bug-Reports:   http://github.com/brentonashworth/sitecheck
 Copyright:     (c) 2011 Brenton Ashworth
@@ -51,11 +53,12 @@ Library
                    regex-posix,
                    regex-compat,
                    containers
+
   Exposed-Modules: Network.SiteCheck,
                    Network.SiteCheck.Filter,
                    Network.SiteCheck.URL,
-                   Network.SiteCheck.Data,
-                   Network.SiteCheck.Util,
+                   Network.SiteCheck.Data
+  Other-modules:   Network.SiteCheck.Util,
                    Network.SiteCheck.Output
 
   Hs-Source-Dirs:  src

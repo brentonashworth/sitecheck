@@ -3,7 +3,7 @@ GHC_FLAGS = -fforce-recomp -itest -isrc
 INCLUDE = --include=Network.SiteCheck.Data --include=Network.SiteCheck.URL --include=Network.SiteCheck --include=Network.SiteCheck.Util --include=Network.SiteCheck.Filter
 
 sitecheck:
-	$(GHC) --make -o sitecheck -isrc src/Main.hs
+	$(GHC) -Wall --make -o sitecheck -isrc src/Main.hs
 
 tests:
 	$(GHC) $(GHC_FLAGS) -fhpc --make -main-is TestSuite test/TestSuite.hs
@@ -26,4 +26,4 @@ clean:
 	rm -f `find . -type f -name *.o`
 	rm -f *.html
 	rm -f TestSuite.tix
-	rm -rf dist
+	cabal clean
