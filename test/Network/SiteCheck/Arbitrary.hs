@@ -116,7 +116,7 @@ instance Arbitrary State where
     links <- listOf $ arbitrary
     let links' = distinctLinks links
         vis' = foldr (\next acc -> deleteVisited next acc) vis links'
-    return $ newState vis' links'
+    return $ initState vis' links'
 
 instance Arbitrary Response where
   arbitrary = do

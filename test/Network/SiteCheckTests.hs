@@ -40,7 +40,7 @@ response :: Int -> Response
 response code = (Response { rStatus = code
                           , rHeaders = [("Location", "/redirect")]
                           , rBody = ""})
-startState = newState emptyVisited [(toLink "http://a.b.c/test")]
+startState = initState emptyVisited [(toLink "http://a.b.c/test")]
 
 non200Resp200 = startState @=? non200Resp emptyLink mkResponse startState
 non200Resp302 = 
@@ -61,7 +61,7 @@ prop_visited_not_changed l resp state =
 -- | All URLs in the stack should be Absolute URLs
 prop_all_stack_absolute l resp state =
   let s = non200Resp l resp state in
-  and $ map eqPart $ stackURLs s
+  and $ map eqPart $ stackAsURLs s
   where eqPart url = case (url_type url) of
                        Absolute _ -> True
                        _          -> False
@@ -69,19 +69,19 @@ prop_all_stack_absolute l resp state =
 -- | No Link should have a link value that also in the previous list
 prop_link_not_in_previous l resp state =
   let s = non200Resp l resp state in
-  and $ map prevNotElem $ stack s
+  and $ map prevNotElem $ getStack s
   where prevNotElem x = (toURL x) `notElem` (previous x)
 
 -- | There must be no duplicates in the stack.
 prop_pushlinks_no_stack_dups script link resp state =
   let s = pushLinks200 script link resp state 
-      after = stackURLs s
+      after = stackAsURLs s
   in
   after == nub after
 
 -- | Queuing links should produce no duplicates in the push.
 prop_pushlinks_no_dups script l resp state =
   let s = pushLinks200 script l resp state
-      all = map (exportURL . theURL) $ (exportVisited s) ++ (stack s)
+      all = map (exportURL . theURL) $ (exportVisited s) ++ (getStack s)
   in
   all == nub all

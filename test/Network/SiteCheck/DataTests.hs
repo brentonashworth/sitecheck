@@ -39,8 +39,8 @@ testLink p prev code l =
 
 emptyLink = testLink "" [] 200 ""
 
-statusOkFalse = False @=? statusOk (testLink "" [] 302 "")
-statusOkTrue = True @=? statusOk (testLink "" [] 200 "")
+statusOkFalse = False @=? isStatusOk (testLink "" [] 302 "")
+statusOkTrue = True @=? isStatusOk (testLink "" [] 200 "")
 
 headerPresent = (Just "b") @=? header mkResponse "a"
 headerAbsent = Nothing @=? (header mkResponse "b" :: Maybe String)

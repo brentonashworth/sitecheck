@@ -56,7 +56,7 @@ executeScript script = withCurlDo $ do
 -- which did not return 200 status codes. This list contains tuples with the
 -- URL and status code.
 crawl :: Config -> IO [Link]
-crawl config = crawler config $ newState emptyVisited $ initStack config
+crawl config = crawler config $ initState emptyVisited $ initStack config
 
 -- TODO: The stack should never contain something that has been visited. You
 -- shouldn't have to check to see if the next item in the stack has been
@@ -66,8 +66,8 @@ crawl config = crawler config $ newState emptyVisited $ initStack config
 crawler :: Config -> State -> IO [Link]
 crawler config state
   | isStackEmpty state = return $ exportVisited state
-  | isNextVisited state = crawler config $ removeNext state -- defensive (bad)
-  | isOverLimit config state = crawler config $ emptyStack state
+  | isNextVisited state = crawler config $ tailStack state -- defensive (bad)
+  | isOverLimit config state = crawler config $ deleteStack state
   | otherwise = do
       whenOpt config PrintStack $ printStack state
       whenOpt config PrintTopStack $ printTopStack state

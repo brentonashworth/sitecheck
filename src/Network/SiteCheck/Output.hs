@@ -60,7 +60,7 @@ printStack :: State -> IO ()
 printStack state = do
   putStrLn ("Current Stack:")
   mapM_ (\x -> do 
-          putStrLn (indent ++ x)) (exportStackURLs state)
+          putStrLn (indent ++ x)) (stackAsStrings state)
 
 printActions :: [Action] -> IO ()
 printActions xs =
@@ -94,7 +94,7 @@ printTopStack state =
             group .
             sort .
             map (exportURL . removeParams . toURL) .
-            stack $ state
+            getStack $ state
   in do
     putStrLn ("Top Stack:")
     mapM_ (\(count, url) -> do 
