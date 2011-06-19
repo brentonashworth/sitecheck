@@ -122,6 +122,7 @@ postFormAction config l r (Post url params) state =
         301 -> return $ followPost l r' state
         302 -> return $ followPost l r' state
         _   -> return state
+postFormAction _ _ _ _ state = return state
 
 getAction :: Action -> State -> State
 getAction (Get url params) state = 
@@ -130,6 +131,7 @@ getAction (Get url params) state =
       Just u  -> pushStack (foldl add_param u params') state
       Nothing -> state
   where encode (a, b) = (a, encString True ok_param b) 
+getAction _ state = state
 
 pushLinks200 :: Script -> Link -> Response -> State -> State
 pushLinks200 script link r = mergeWithStack link (extractLinks script r link)
