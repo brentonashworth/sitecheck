@@ -23,6 +23,8 @@ tests = [ testCase "remove params with params" removeParamsWithParams
         , testCase "fixed combinations 2" fixedCombinations2
         , testCase "is in domain" itIsInDomain
         , testCase "is not in domain" itIsNotInDomain
+        , testCase "is in domain with port" itIsInDomainWithPort
+        , testCase "is not in domain with port" itIsNotInDomainWithPort
         , testCase "merge paths 1" mergePaths1
         , testCase "merge paths 2" mergePaths2
         , testCase "merge paths 3" mergePaths3
@@ -100,6 +102,14 @@ itIsInDomain =
 itIsNotInDomain =
   let Just url = importURL "http://a.b.c/test" in
   False @=? isInDomain "a.b.d" url
+
+itIsInDomainWithPort =
+  let Just url = importURL "http://a.b.c:10/test" in
+  True @=? isInDomain "a.b.c:10" url
+
+itIsNotInDomainWithPort =
+  let Just url = importURL "http://a.b.c:30/test" in
+  False @=? isInDomain "a.b.c:10" url
 
 mergePaths1 = ""          @=? ""      >/< ""
 mergePaths2 = ""          @=? "a"     >/< ""

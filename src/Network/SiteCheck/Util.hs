@@ -17,7 +17,7 @@ fromMaybe xs = foldr g [] xs
 
 -- | Safely get the head.
 safeHead :: [a] -> Maybe a
-safeHead (x:xs) = Just x
+safeHead (x:_) = Just x
 safeHead [] = Nothing
 
 splitWith :: String -> String -> [String] 

@@ -17,12 +17,13 @@ module Network.SiteCheck.URL
   ) where
 
 import Network.URL
-import Data.List (partition, sort, intersperse)
+import Data.List (partition, sort, intersperse, isPrefixOf)
 
 import Network.SiteCheck.Util
 
 type Param = (String, String)
 
+emptyURL :: URL
 emptyURL = URL PathRelative "" []
 
 -- | Given a function which modifies parameters, apply this to a URL
@@ -65,12 +66,12 @@ a  >/<  b = (relative a) </> b
 -- absolute. This will only return a new URL is the type of the second
 -- URL is HostRelative or PathRelative.
 makeAbsolute :: URL -> URL -> URL
-makeAbsolute (URL t path params) url = 
+makeAbsolute (URL t path _) url = 
   case url_type url of
     PathRelative -> URL t (prefixPath path url) (url_params url)
     HostRelative -> URL t (url_path url) (url_params url)
     Absolute _   -> url
-  where prefixPath path url = path >/< (url_path url)
+  where prefixPath p u = p >/< (url_path u)
    
 -- | Sometimes a URL may encode a list of options such as:
 -- 
@@ -91,7 +92,7 @@ makeAbsolute (URL t path params) url =
 fixedCombinations :: String -> Int -> URL -> [URL]
 fixedCombinations s n url =
   let params = url_params url
-      (t, o) = partition ((s ==) . fst) params
+      (t, _) = partition ((s ==) . fst) params
       values = map snd t
   in map mkURL $ combine $ replicate n values
   where mkURL xs = foldr addP (URL (url_type url) (url_path url) []) xs
@@ -106,7 +107,21 @@ combine (set:sets) = let cp = combine sets in
 
 -- | Return True if the URL is in the provided domain.
 isInDomain :: String -> URL -> Bool
-isInDomain d url = case url_type url of
-                     Absolute (Host _ host _) -> host == d
-                     _                        -> False
+isInDomain d url = 
+  let result = do domainURL <- importURL (addScheme d)
+                  uHost <- getHost url
+                  dHost <- getHost domainURL
+                  return $ uHost == dHost
+  in case result of
+       Just x  -> x
+       Nothing -> False
+  where addScheme x = if "http" `isPrefixOf` x
+                      then x
+                      else "http://" ++ x
+        getHost u = case url_type u of
+                      Absolute h -> Just h
+                      _          -> Nothing
+
+                      
+                    
                    
