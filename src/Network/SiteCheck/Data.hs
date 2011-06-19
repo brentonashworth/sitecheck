@@ -94,7 +94,7 @@ isRedirect (Link _ _ _ _) = False
 
 -- | Was this Link the result of a redirect?
 wasRedirected :: Link -> Bool
-wasRedirected (Link _ (x:xs) _ _) = True
+wasRedirected (Link _ (_:_) _ _) = True
 wasRedirected (Link _ _ _ _) = False
 
 -- | Is the 'StatusCode' for this Link 200?
@@ -198,7 +198,7 @@ isOverLimit (_, script) state =
     Nothing -> False
 
 filterResults :: Config -> [Link] -> [Link]
-filterResults config@(_, script) links
+filterResults config links
   | (isOptionSet AllResults config) = links
   | (isOptionSet RedirectResults config) = filter redirectedOrNon200 links
   | otherwise = filter (not . isStatusOk) links
@@ -261,23 +261,23 @@ initState :: Visited -> Stack -> State
 initState v s = State v s
 
 isNextVisited :: State -> Bool
-isNextVisited (State v (x:xs)) = isVisited v x
+isNextVisited (State v (x:_)) = isVisited v x
 isNextVisited (State _ []) = False
 
 tailStack :: State -> State
-tailStack (State v (x:xs)) = State v xs
+tailStack (State v (_:xs)) = State v xs
 tailStack state@(State _ []) = state
 
 deleteStack :: State -> State
 deleteStack (State v _) = State v []
 
 isStackEmpty :: State -> Bool
-isStackEmpty (State _ (x:xs)) = False
+isStackEmpty (State _ (_:_)) = False
 isStackEmpty _                = True
 
 popStack :: State -> (Maybe Link, State)
 popStack (State v (x:xs)) = (Just x, (State v xs))
-popStack s@(State v []) = (Nothing, s)
+popStack s@(State _ []) = (Nothing, s)
 
 pushStack :: (URLish a) => a -> State -> State
 pushStack l (State v xs) = (State v ((toLink l) : xs))
@@ -295,10 +295,10 @@ stackAsStrings :: State -> [String]
 stackAsStrings = map exportURL . stackAsURLs
 
 mergeWithStack :: Link -> [URL] -> State -> State
-mergeWithStack parent new (State visited stack) = 
+mergeWithStack pnt new (State visited stack) = 
   (State visited) $
   (stack ++) $ 
-  (map (Link (theURL parent) [] NoCode)) $
+  (map (Link (theURL pnt) [] NoCode)) $
   distinct visited stack new
 
 data Response =   Error 
