@@ -1,16 +1,22 @@
 h1. SiteCheck
 
-SiteCheck is a Haskell library for web developers and web site administrators which automates the process of checking a web site for broken links or for any pages which are not returning a 200 status code.
+SiteCheck is a Haskell library for web developers and web site administrators which allows for the creation of crawlers which can find and report problems within a single domain. It is inspired by QuickCheck and meant to fill a space somewhere between QuickCheck and tools like Canoo WebTest and Selenium.
 
-SiteCheck will crawl a domain and record the status of every URL which is retrieved. It will retrieve URLs outside of the domain but will not process the results or crawl outside of the domain.
+The core feature of SiteCheck is that it will simply crawl every page of a web site. In order to successfully crawl a site, all links must actually work. If they do not work (they return a non 200 status code) they will be reported. Crawling a web site is not as easy as it sounds. Every site is different. Perhaps a site has a secure area which requires a login or maybe even a legal disclaimer that must be agreed to in order to continue. A new SiteCheck crawler can be created from a set of decisions. Each decision specifies some action to take when a specific URL is encountered. Decisions allow custom logic and actions to be added to the crawler.
 
-As a developer, you use SiteCheck by writing a "script" which controls how it behaves. In this script you specify "decisions" which are made when a specific URL is retrieved. You may choose to ignore a page, post a form and/or push the links from that page on to the crawl stack. SiteCheck is built on top of Network.Curl so it can handle secure http requests.
+Another aspect of crawling is how new links are added to the list of links to check. SiteCheck will read all href attributes from a page into a list of strings. You have complete control over how these strings are converted to URLs. Functions may be provided to map and filter these links. This gives you complete control over what is crawled and how it is crawled.
 
-SiteCheck will follow redirects and report a page based on the final status code that is received. It will also keep track of all redirects so that you can fix links on your end.
+SiteCheck will automatically handle cookies and secure connections.
 
-Finally, SiteCheck allows you to filter and transform URLs before they are added to the stack. This allows you to eliminate parameters which are unnecessary, order parameters so that the same page is not visited twice (with parameters in a different order) and limit the number of combinations of parameters for a page which takes multiple parameters with the same name.
+SiteCheck will automatically follow redirects until either a non redirecting status code is returned or a cycle is detected. Redirect status codes are not reported unless a cycle is detected. Otherwise the final status code is reported. Output can be configured to show all redirects.
 
-This is a new project so there is no documentation other than the source code. To get started, look at the example script in Main.hs.
+Once SiteCheck can successfully crawl a web site, it provides you with only a minimal amount of useful information. It gets more interesting when you begin to add extensions. In general, an extension is something which may be added to the crawler to allow it to report any information that can be obtained from analyzing the contents of a web page.
+
+The first extension, which is currently under development, is a CSS Cleaner which will report all CSS rules which are not being used (this is the original problem which I set out to solve). It is not hard to imagine other useful extensions.
+
+Once the CSS Cleaner is implemented, it should be easy for other developers to provide their own extensions. The next major goal will be to create an external DSL which will allow for test scripts to be written in a concise syntax outside of Haskell (because, seriously, how many web developers and web site administrators want to deal with Haskell?). 
+
+Finally, this is a new project so there is no documentation other than this file and the source code. To get started, look at the example script in <a href="http://github.com/brentonashworth/sitecheck/blob/master/src/Main.hs">Main.hs</a>.
 
 h2. Building
 
@@ -24,20 +30,24 @@ make cov
 
 h2. Install
 
-To use this library, you will need to have <a href="http://hackage.haskell.org/platform/">Haskell</a> installed. Next, clone this repository, navigate into the top level directory and run the following commands:
+To use this library, you will need to have the <a href="http://hackage.haskell.org/platform/">Haskell Platform</a> installed. Next, clone this repository, navigate into the top level directory and run the following commands:
 
 <pre><code>cabal configure
 cabal build
 cabal install
 </code></pre>
 
+When we get to version 0.1.0, sitecheck will be added to <a href="http://hackage.haskell.org/packages/hackage.html">hackage</a>.
+
 h2. TODO
 
 Other than bringing this library into a stable condition, I do have some ideas for improvements and added usefulness.
 
+# Read and Check all hrefs, not just anchors.
+# Check that redirect cycles are being reported. If not then fix it.
+# Create the CSS Cleaner Extension.
 # Create an external DSL so that users will not *get* to write scripts in Haskell.
-# Read the output file and recheck URLs to see if problems have been resolved.
-# Find CSS that is not being used.
+# Read parent pages from an output and then recheck them to ensure that problems have been resolved.
 
 h2. License
 
